@@ -5,22 +5,34 @@ export const sendToken = (user, res, statusCode = 200, message = "Success") => {
     const token = user.generateToken();
     const isProduction = process.env.NODE_ENV === "production";
 
-    //send the token to the user 
+    // Set cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction, // HTTPS in production
-      sameSite: isProduction ? "none" : "lax",
+      secure: false,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // Remove sensitive info
-    const userResponse = user.toJSON();
+    // 👇 Sanitized User Data (SAFE)
+    const userResponse = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+    };
 
-  
-    
+
+    console.log("Generated Token:", token);
+
     return res
       .status(statusCode)
-      .json(new ApiResponse(statusCode, { user: userResponse, token }, message));
+      .json(
+        new ApiResponse(statusCode, 
+          { user: userResponse, token }, 
+          message
+        )
+      );
   } catch (error) {
     console.error("Error in sendToken:", error);
     return res

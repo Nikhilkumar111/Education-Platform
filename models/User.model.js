@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { string } from "zod";
+import { type } from "os";
 
 const userSchema = new mongoose.Schema(
   {
@@ -31,6 +33,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Avatar image is required"],
     },
+    // number:{
+    //   type:string
+    // },
+
+resetOTP:{
+  type:string,
+} ,
+  resetOTPExpiry:{
+    type: Date,
+  }
+,
     studentProfile: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "StudentProfile",

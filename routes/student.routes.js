@@ -29,7 +29,7 @@ router.post(
   protect,
   authorizeRoles("student"),
   upload.single("avatar"),
-  validate(createStudentSchema),
+  // validate(createStudentSchema),
   createStudentProfile
 );
 
@@ -45,11 +45,11 @@ router.get(
 
 // ✅ Update own profile (STUDENT only)
 router.put(
-  "/me/update",
+  "/update",
   protect,
   authorizeRoles("student"),
   upload.single("avatar"),
-  validate(updateStudentSchema),
+  // validate(updateStudentSchema),
   updateStudentProfile
 );
 

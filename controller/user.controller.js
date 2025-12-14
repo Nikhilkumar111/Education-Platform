@@ -1,22 +1,28 @@
 import User from "../models/User.model.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import TeacherProfile from "../models/teacherProfile.model.js";
+import StudentProfile from "../models/studentProfile.model.js";
+
+import  {asyncHandler}  from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { sendToken } from "../utils/sendToken.js";
 import fs from "fs";
 
+
+
 /* -------------------------------- REGISTER -------------------------------- */
 export const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role  } = req.body;
 
   console.log("Incoming Registration:", { name, email, role });
 
   // Validate required fields
-  if (!name || !email || !password || !role) {
+  if (!name || !email || !password || !role ) {
+    console.log()
     return res
       .status(400)
-      .json(new ApiResponse(400, null, " All fields including role are required"));
+      .json(new ApiResponse(400, null, " All fields including  are required"));
   }
 
   // Check if user already exists
@@ -43,6 +49,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     name,
     email,
     password,
+  
     role,
     avatar: uploadedAvatar.secure_url,
   });
@@ -50,37 +57,129 @@ export const registerUser = asyncHandler(async (req, res) => {
   // Send JWT token & response via helper
   return sendToken(newUser, res, 201, "🎉 User registered successfully!");
 });
+// **************************************forget password with the collective email so update the
+
+
+
+
+
+
+
 
 
 
 /* ---------------------------------- LOGIN --------------------------------- */
+// export const loginUser = asyncHandler(async (req, res) => {
+//   const { email, password } = req.body;
+//   console.log("Login Attempt:", { email });
+
+//   if (!email || !password) {
+//     return res
+//       .status(400)
+//       .json(new ApiResponse(400, null, "Email and password are required"));
+//   }
+
+//   const user = await User.findOne({ email }).select("+password");
+//   if (!user) {
+//     return res
+//       .status(401)
+//       .json(new ApiResponse(401, null, " Invalid email or password"));
+//   }
+
+//   const isPasswordCorrect = await user.matchPassword(password);
+//   if (!isPasswordCorrect) {
+//     return res
+//       .status(401)
+//       .json(new ApiResponse(401, null, " Invalid email or password"));
+//   }
+
+//   // Send token and response via sendToken
+//   return sendToken(user, res, 200, "🎉 User logged in successfully!");
+// });
+
+
+
+
+
 export const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  console.log("Login Attempt:", { email });
 
+  // 1️⃣ Validate
   if (!email || !password) {
     return res
       .status(400)
       .json(new ApiResponse(400, null, "Email and password are required"));
   }
 
+  // 2️⃣ Find user
   const user = await User.findOne({ email }).select("+password");
   if (!user) {
     return res
       .status(401)
-      .json(new ApiResponse(401, null, " Invalid email or password"));
+      .json(new ApiResponse(401, null, "Invalid email or password"));
   }
 
+  // 3️⃣ Check password
   const isPasswordCorrect = await user.matchPassword(password);
   if (!isPasswordCorrect) {
     return res
       .status(401)
-      .json(new ApiResponse(401, null, " Invalid email or password"));
+      .json(new ApiResponse(401, null, "Invalid email or password"));
   }
 
-  // Send token and response via sendToken
-  return sendToken(user, res, 200, "🎉 User logged in successfully!");
+  // 4️⃣ ROLE-BASED PROFILE CREATION
+  if (user.role === "student") {
+  const studentProfile = await StudentProfile.findOne({ user: user._id });
+
+  if (!studentProfile) {
+    await StudentProfile.create({
+      user: user._id,
+      city: user.city || "",
+      grade: user.grade || "",
+      email:user.email || "",
+      achievements: [],
+      avatar: user.avatar,
+      contactNumber: user.phone || "",
+      // remove email: user.email
+    });
+  }
+}
+
+
+
+  if (user.role === "teacher") {
+    const teacherProfile = await TeacherProfile.findOne({ user: user._id });
+
+    if (!teacherProfile) {
+      await TeacherProfile.create({
+        user: user._id,
+        subjects: [],
+        experience: 0,
+        avatar: user.avatar, // ✅ from User
+      });
+    }
+  }
+
+  // 5️⃣ Send token + safe user response
+  return sendToken(user, res, 200, "Login successful");
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -111,6 +210,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 /* --------------------------------- LOGOUT --------------------------------- */
 export const logoutUser = asyncHandler(async (req, res) => {
   res.cookie("token", "", { maxAge: 0, httpOnly: true });
+  console.log("Logged out successfully")
   return res
     .status(200)
     .json(new ApiResponse(200, null, " Logged out successfully"));

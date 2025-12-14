@@ -17,6 +17,7 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
 
+
     // Optional: related report for which payment is made
     report: {
       type: mongoose.Schema.Types.ObjectId,
@@ -29,6 +30,7 @@ const paymentSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+
 
     // Payment status
     status: {
@@ -43,6 +45,8 @@ const paymentSchema = new mongoose.Schema(
       enum: ["card", "paypal", "wallet", "other"],
       default: "card",
     },
+
+    
 
     // Optional: transaction reference
     transactionId: {

@@ -16,6 +16,7 @@ import reportRoutes from "./routes/report.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import testRoutes from  "./routes/test.routes.js";
+import walletRoutes from "./routes/wallet.routes.js";
 
 // Import ApiError for proper error handling
 import { ApiError } from "./utils/ApiError.js";
@@ -30,11 +31,15 @@ const app = express();
 // ----------------- Middlewares -----------------
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "*",
-  credentials: true,
-}));
 app.use(cookieParser());
+
+
+app.use(cors({
+  origin: "http://localhost:3000", // 👈 exact frontend URL
+  credentials: true,               // 👈 allow cookies
+}));
+
+
 app.use(morgan("dev"));
 
 // Serve static files
@@ -45,6 +50,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // ----------------- Routes -----------------
 app.use("/api/auth", authRoutes);
 app.use("/api/students", studentRoutes);
+app.use("/api/wallet",walletRoutes);
 app.use("/api/teachers", teacherRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/tests", testRoutes);
