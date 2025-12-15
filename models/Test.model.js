@@ -28,18 +28,7 @@ const testSchema = new mongoose.Schema(
 
     // this is the different section acording to the formation of
     // website we have to made this time to time 
-    questions: [
-      {
-        questionText: { type: String,
-           required: true },
-        options: [{ type: String,
-           required: true }],
-        correctAnswer: { type: String,
-           required: true },
-        marks: { type: Number, 
-          default: 1 }, // optional field to assign marks per question
-      },
-    ],
+  
 
     // Students assigned this test
     assignedTo: [

@@ -134,7 +134,7 @@ export const loginUser = asyncHandler(async (req, res) => {
   if (!studentProfile) {
     await StudentProfile.create({
       user: user._id,
-      city: user.city || "",
+      location:user.location || "",
       grade: user.grade || "",
       email:user.email || "",
       achievements: [],
@@ -150,14 +150,21 @@ export const loginUser = asyncHandler(async (req, res) => {
   if (user.role === "teacher") {
     const teacherProfile = await TeacherProfile.findOne({ user: user._id });
 
-    if (!teacherProfile) {
-      await TeacherProfile.create({
-        user: user._id,
-        subjects: [],
-        experience: 0,
-        avatar: user.avatar, // ✅ from User
-      });
-    }
+
+  if (!teacherProfile) {
+    await TeacherProfile.create({
+      user: user._id,
+      subjects: [],
+      qualification: "",
+      experience: 0,
+      bio: "",
+      // city: "",
+      // address: "",
+      avatar: user.avatar || "",
+      verified: false,
+      offlineAvailable: true,
+    });
+  }
   }
 
   // 5️⃣ Send token + safe user response

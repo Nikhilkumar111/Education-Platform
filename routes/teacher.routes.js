@@ -96,11 +96,11 @@ router.get(
    UPDATE TEACHER PROFILE (Teacher Only)
 --------------------------------------------------- */
 router.put(
-  "/me/update",
+  "/update",
   protect,
   authorizeRoles("teacher"),
   upload.single("avatar"),
-  validate(teacherProfileSchema), // allow partial updates
+  // validate(teacherProfileSchema), // allow partial updates
   updateTeacherProfile
 );
 

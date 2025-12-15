@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { string } from "zod";
 
 const teacherProfileSchema = new mongoose.Schema(
   {
@@ -7,16 +8,18 @@ const teacherProfileSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    subjects: [{ type: String }],
+   subjectsChosen: [{ type: String }],
     qualification: { type: String },
     experience: { type: Number, default: 0 },
     bio: { type: String },
-    city: { type: String },
-    address: { type: String },
+    location: { type: String },
+    phone:{type:String},
+    // address: { type: String },
     ratings: { type: Number, default: 0 },
     offlineAvailable: { type: Boolean, default: true },
     verified: { type: Boolean, default: false },
     avatar: { type: String },
+    Balance:{type:String ,default:0}
   },
   { timestamps: true }
 );

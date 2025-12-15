@@ -80,7 +80,8 @@ export const createTeacherProfile = asyncHandler(async (req, res) => {
 
 // ✅ Get current teacher profile
 export const getTeacherProfile = asyncHandler(async (req, res) => {
-  const profile = await TeacherProfile.findOne({ user: req.user._id });
+  const profile = await TeacherProfile.findOne({ user: req.user._id }).populate("user", "name email phone avatar");
+    console.log("Teacher profile is ", profile)
   if (!profile) return res.status(404).json(new ApiResponse(404, null, "Profile not found"));
   return res.status(200).json(new ApiResponse(200, { profile }, "Teacher profile fetched"));
 });
@@ -89,27 +90,87 @@ export const getTeacherProfile = asyncHandler(async (req, res) => {
 
 
 
+
 // ✅ Update teacher profile
 export const updateTeacherProfile = asyncHandler(async (req, res) => {
   const updates = { ...req.body };
+console.log("Update controller triggered");
 
-  // Upload avatar if provided
-  if (req.file) {
-    const uploaded = await uploadOnCloudinary(req.file.path, "image");
-    updates.avatar = uploaded.secure_url;
-    if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+
+
+
+  // If subjectsChosen is sent as string, parse it
+  if (updates.subjectsChosen && typeof updates.subjectsChosen === "string") {
+    try {
+      updates.subjectsChosen = JSON.parse(updates.subjectsChosen);
+    } catch (err) {
+      console.error("Failed to parse subjectsChosen:", err);
+      return res.status(400).json(new ApiResponse(400, null, "Invalid subjectsChosen format"));
+    }
   }
 
+
+  // Handle avatar upload if file exists
+  if (req.file) {
+    try {
+      const uploaded = await uploadOnCloudinary(req.file.path, "avatar");
+      updates.avatar = uploaded.secure_url;
+      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    } catch (err) {
+      console.error("Avatar upload failed:", err);
+      return res.status(500).json(new ApiResponse(500, null, "Avatar upload failed"));
+    }
+  }
+
+ // Update profile in DB
   const updatedProfile = await TeacherProfile.findOneAndUpdate(
     { user: req.user._id },
     updates,
     { new: true, runValidators: true }
+  ).populate("user", "name email phone avatar"); // include user info
+
+  if (!updatedProfile) {
+    return res.status(404).json(new ApiResponse(404, null, "Profile not found"));
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, { profile: updatedProfile }, "Teacher profile updated")
   );
-
-  if (!updatedProfile) return res.status(404).json(new ApiResponse(404, null, "Profile not found"));
-
-  return res.status(200).json(new ApiResponse(200, { profile: updatedProfile }, "Teacher profile updated"));
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ✅ Get all teachers (students/admin can view)
 export const getAllTeachers = asyncHandler(async (req, res) => {
