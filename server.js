@@ -37,7 +37,7 @@ app.use(cookieParser());
 
 
 app.use(cors({
-  origin: "https://education-platform-frontend-delta.vercel.app"|| "http://localhost:3000", // 👈 exact frontend URL
+  origin: "https://education-platform-frontend-9yqe.vercel.app"|| "http://localhost:3000", // 👈 exact frontend URL
   credentials: true,               // 👈 allow cookies
 }));
 
