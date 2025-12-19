@@ -100,7 +100,6 @@ export const registerUser = asyncHandler(async (req, res) => {
 
 
 
-
 export const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -127,51 +126,45 @@ export const loginUser = asyncHandler(async (req, res) => {
       .json(new ApiResponse(401, null, "Invalid email or password"));
   }
 
-  // 4️⃣ ROLE-BASED PROFILE CREATION
+  // 4️⃣ STUDENT PROFILE
   if (user.role === "student") {
-  const studentProfile = await StudentProfile.findOne({ user: user._id });
+    const studentProfile = await StudentProfile.findOne({ user: user._id });
 
-  if (!studentProfile) {
-    await StudentProfile.create({
-      user: user._id,
-      location:user.location || "",
-      grade: user.grade || "",
-      email:user.email || "",
-      achievements: [],
-      avatar: user.avatar,
-      contactNumber: user.phone || "",
-      // remove email: user.email
-    });
+    if (!studentProfile) {
+      await StudentProfile.create({
+        user: user._id,
+        location: user.location || "",
+        grade: user.grade || "",
+        email: user.email || "",
+        achievements: [],
+        avatar: user.avatar || "",
+        contactNumber: user.phone || "",
+      });
+    }
   }
-}
 
-
-
+  // 5️⃣ TEACHER PROFILE ✅ CORRECTED
   if (user.role === "teacher") {
     const teacherProfile = await TeacherProfile.findOne({ user: user._id });
 
-
-  if (!teacherProfile) {
-    await TeacherProfile.create({
-      user: user._id,
-      subjects: [],
-      qualification: "",
-      experience: 0,
-      bio: "",
-      // city: "",
-      // address: "",
-      avatar: user.avatar || "",
-      verified: false,
-      offlineAvailable: true,
-    });
-  }
+    if (!teacherProfile) {
+      await TeacherProfile.create({
+        user: user._id,
+        subjects: [],
+        qualification: "",
+        experience: 0,
+        bio: "",
+        avatar: user.avatar || "",
+        verified: false,
+        offlineAvailable: true,
+        pricePerMonth: 0, // ✅ DEFAULT ONLY
+      });
+    }
   }
 
-  // 5️⃣ Send token + safe user response
+  // 6️⃣ Send token
   return sendToken(user, res, 200, "Login successful");
 });
-
-
 
 
 

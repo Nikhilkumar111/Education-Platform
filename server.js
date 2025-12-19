@@ -17,6 +17,8 @@ import messageRoutes from "./routes/message.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import testRoutes from  "./routes/test.routes.js";
 import walletRoutes from "./routes/wallet.routes.js";
+import subscriptionRoutes from "./routes/subscription.routes.js";
+
 
 // Import ApiError for proper error handling
 import { ApiError } from "./utils/ApiError.js";
@@ -53,10 +55,12 @@ app.use("/api/students", studentRoutes);
 app.use("/api/wallet",walletRoutes);
 app.use("/api/teachers", teacherRoutes);
 app.use("/api/teachers/tests", testRoutes);
+app.use("/api/subscriptions",subscriptionRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/payments", paymentRoutes);
+
 
 // Health check
 app.get("/", (req, res) => {

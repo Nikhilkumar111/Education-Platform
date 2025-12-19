@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import Studentwalletm from "../models/Wallet.model.js";
+import walletBalanceS from "../models/Wallet.model.js";
 import { razorpay } from "../utils/razorpay.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { success } from "zod";
@@ -74,10 +74,10 @@ export const VerifyPayment = asyncHandler(async (req, res) => {
   }
 
   // ✅ Find wallet OR create one
-  let wallet = await Studentwalletm.findOne({ user: userId });
+  let wallet = await walletBalanceS.findOne({ user: userId });
 
   if (!wallet) {
-    wallet = await Studentwalletm.create({
+    wallet = await walletBalanceS.create({
       user: userId,
       walletBalance: 0,
     });
@@ -99,11 +99,11 @@ export const VerifyPayment = asyncHandler(async (req, res) => {
 export const getWalletBalance = async (req, res) => {
   const userId = req.user._id;
 
-  let wallet = await Studentwalletm.findOne({ user: userId });
+  let wallet = await walletBalanceS.findOne({ user: userId });
 
   // Create wallet if not exists
   if (!wallet) {
-    wallet = await Studentwalletm.create({
+    wallet = await walletBalanceS.create({
       user: userId,
       walletBalance: 0,
     });

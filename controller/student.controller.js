@@ -22,37 +22,37 @@ export const getStudentProfile = asyncHandler(async (req, res) => {
 
 
 
-export const createStudentProfile = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
-  const { grade, subjectsChosen, teacher, city, contactNumber } = req.body;
+// export const createStudentProfile = asyncHandler(async (req, res) => {
+//   const userId = req.user._id;
+//   const { grade, subjectsChosen, teacher, city, contactNumber } = req.body;
 
-  const existingProfile = await StudentProfile.findOne({ user: userId });
-  if (existingProfile) {
-    return res.status(409).json(new ApiResponse(409, null, "Student profile already exists"));
-  }
+//   const existingProfile = await StudentProfile.findOne({ user: userId });
+//   if (existingProfile) {
+//     return res.status(409).json(new ApiResponse(409, null, "Student profile already exists"));
+//   }
 
-  // Upload avatar if provided
-  let avatarUrl = req.user.avatar;
-  if (req.file) {
-    const uploaded = await uploadOnCloudinary(req.file.path, "image");
-    avatarUrl = uploaded.secure_url;
-    if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-  }
+//   // Upload avatar if provided
+//   let avatarUrl = req.user.avatar;
+//   if (req.file) {
+//     const uploaded = await uploadOnCloudinary(req.file.path, "image");
+//     avatarUrl = uploaded.secure_url;
+//     if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+//   }
 
-  const newProfile = await StudentProfile.create({
-    user: userId,
-    grade,
-    subjectsChosen,
-    teacher,
-    city,
-    contactNumber,
-    avatar: avatarUrl,
-  });
+//   const newProfile = await StudentProfile.create({
+//     user: userId,
+//     grade,
+//     subjectsChosen,
+//     teacher,
+//     city,
+//     contactNumber,
+//     avatar: avatarUrl,
+//   });
 
-  await User.findByIdAndUpdate(userId, { studentProfile: newProfile._id });
+//   await User.findByIdAndUpdate(userId, { studentProfile: newProfile._id });
 
-  return res.status(201).json(new ApiResponse(201, { profile: newProfile }, "Student profile created"));
-});
+//   return res.status(201).json(new ApiResponse(201, { profile: newProfile }, "Student profile created"));
+// });
 
 
 
@@ -63,48 +63,144 @@ export const createStudentProfile = asyncHandler(async (req, res) => {
 //  Get current student profile
 
 
+// export const updateStudentProfile = asyncHandler(async (req, res) => {
+//   const updates = { ...req.body };
+
+//   console.log("Update controller triggered");
+
+//   // If subjectsChosen is sent as string, parse it
+//   if (updates.subjectsChosen && typeof updates.subjectsChosen === "string") {
+//     try {
+//       updates.subjectsChosen = JSON.parse(updates.subjectsChosen);
+//     } catch (err) {
+//       console.error("Failed to parse subjectsChosen:", err);
+//       return res.status(400).json(new ApiResponse(400, null, "Invalid subjectsChosen format"));
+//     }
+//   }
+
+//   // Handle avatar upload if file exists
+//   if (req.file) {
+//     try {
+//       const uploaded = await uploadOnCloudinary(req.file.path, "image");
+//       updates.avatar = uploaded.secure_url;
+//       if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+//     } catch (err) {
+//       console.error("Avatar upload failed:", err);
+//       return res.status(500).json(new ApiResponse(500, null, "Avatar upload failed"));
+//     }
+//   }
+
+//   // Update profile in DB
+//   const updatedProfile = await StudentProfile.findOneAndUpdate(
+//     { user: req.user._id },
+//     updates,
+//     { new: true, runValidators: true }
+//   ).populate("user", "name email phone avatar"); // include user info
+
+
+
+
+//   if (!updatedProfile) {
+//     return res.status(404).json(new ApiResponse(404, null, "Profile not found"));
+//   }
+
+//   return res.status(200).json(
+//     new ApiResponse(200, { profile: updatedProfile }, "Student profile updated")
+//   );
+// });
+// **************************************************
+
 export const updateStudentProfile = asyncHandler(async (req, res) => {
   const updates = { ...req.body };
 
   console.log("Update controller triggered");
 
-  // If subjectsChosen is sent as string, parse it
+  // 🔁 Parse subjectsChosen safely
   if (updates.subjectsChosen && typeof updates.subjectsChosen === "string") {
     try {
       updates.subjectsChosen = JSON.parse(updates.subjectsChosen);
     } catch (err) {
       console.error("Failed to parse subjectsChosen:", err);
-      return res.status(400).json(new ApiResponse(400, null, "Invalid subjectsChosen format"));
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, "Invalid subjectsChosen format"));
     }
   }
 
-  // Handle avatar upload if file exists
+  // 🖼️ Handle avatar upload
+  let avatarUrl;
+
   if (req.file) {
     try {
-      const uploaded = await uploadOnCloudinary(req.file.path, "avatar");
-      updates.avatar = uploaded.secure_url;
-      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      const uploaded = await uploadOnCloudinary(req.file.path, "image");
+
+      if (!uploaded?.secure_url) {
+        throw new Error("Cloudinary upload failed");
+      }
+
+      avatarUrl = uploaded.secure_url;
+      updates.avatar = avatarUrl;
+
+      // cleanup local file
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      // ✅ VERY IMPORTANT: update User avatar for navbar
+      await User.findByIdAndUpdate(req.user._id, {
+        avatar: avatarUrl,
+      });
+
     } catch (err) {
       console.error("Avatar upload failed:", err);
-      return res.status(500).json(new ApiResponse(500, null, "Avatar upload failed"));
+      return res
+        .status(500)
+        .json(new ApiResponse(500, null, "Avatar upload failed"));
     }
   }
 
-  // Update profile in DB
+  // 🔄 Update Student Profile
   const updatedProfile = await StudentProfile.findOneAndUpdate(
     { user: req.user._id },
     updates,
     { new: true, runValidators: true }
-  ).populate("user", "name email phone avatar"); // include user info
+  ).populate("user", "name email avatar");
 
   if (!updatedProfile) {
-    return res.status(404).json(new ApiResponse(404, null, "Profile not found"));
+    return res
+      .status(404)
+      .json(new ApiResponse(404, null, "Profile not found"));
   }
 
   return res.status(200).json(
-    new ApiResponse(200, { profile: updatedProfile }, "Student profile updated")
+    new ApiResponse(
+      200,
+      { profile: updatedProfile },
+      "Student profile updated successfully"
+    )
   );
 });
+
+// ****************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

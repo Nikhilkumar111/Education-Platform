@@ -14,11 +14,8 @@ const walletBalanceSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-// export default mongoose.model("Studentwalletm", walletBalanceSchema);
-const Studentwalletm = mongoose.model("Studentwalletm", walletBalanceSchema)
 
-export default Studentwalletm;
+const walletBalanceS = mongoose.model("walletBalanceS", walletBalanceSchema)
 
+export default walletBalanceS;
 
-// const User = mongoose.model("User", userSchema);
-// export default User;

@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  createStudentProfile,
+  // createStudentProfile,
   getStudentProfile,
   updateStudentProfile,
   getAllStudents,
@@ -24,14 +24,15 @@ const router = express.Router();
 
 
 // ✅ Create student profile (STUDENT only)
-router.post(
-  "/",
-  protect,
-  authorizeRoles("student"),
-  upload.single("avatar"),
-  // validate(createStudentSchema),
-  createStudentProfile
-);
+// router.post(
+//   "/",
+//   protect,
+//   authorizeRoles("student"),
+//   upload.single("avatar"),
+//   // validate(createStudentSchema),
+//   createStudentProfile
+// );
+
 
 
 // ✅ Get own student profile (STUDENT only)

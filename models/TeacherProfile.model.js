@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { string } from "zod";
 
 const teacherProfileSchema = new mongoose.Schema(
   {
@@ -8,18 +7,44 @@ const teacherProfileSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-   subjectsChosen: [{ type: String }],
+
+    subjectsChosen: [{ type: String }],
     qualification: { type: String },
     experience: { type: Number, default: 0 },
     bio: { type: String },
     location: { type: String },
-    phone:{type:String},
-    // address: { type: String },
+    phone: { type: String },
+
     ratings: { type: Number, default: 0 },
     offlineAvailable: { type: Boolean, default: true },
     verified: { type: Boolean, default: false },
     avatar: { type: String },
-    Balance:{type:String ,default:0}
+
+    //  Wallet balance for earnings
+    walletBalance: { type: Number, default: 0 },
+
+    //  Assigned students via subscriptions
+    students: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "StudentProfile",
+      },
+    ],
+    // models/teacher.model.js
+pricePerMonth: {
+  type: Number,
+  required: true,
+  min: 0,
+},
+
+
+    // Optional: history of subscriptions/payments
+    subscriptions: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subscription",
+      },
+    ],
   },
   { timestamps: true }
 );
