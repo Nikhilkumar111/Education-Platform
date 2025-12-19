@@ -1,5 +1,5 @@
 import {asyncHandler} from "../utils/asyncHandler.js";
-import Subscription from "../models/subscription.model.js";
+import Subscription from "../models/Subscription.model.js";
 import TeacherProfile from "../models/TeacherProfile.model.js";
 import StudentProfile from "../models/StudentProfile.model.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
