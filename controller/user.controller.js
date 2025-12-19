@@ -1,6 +1,6 @@
 import User from "../models/User.model.js";
-import TeacherProfile from "../models/teacherProfile.model.js";
-import StudentProfile from "../models/studentProfile.model.js";
+import TeacherProfile from "../models/TeacherProfile.model.js";
+import StudentProfile from "../models/StudentProfile.model.js";
 
 import  {asyncHandler}  from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
